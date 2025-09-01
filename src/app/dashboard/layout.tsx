@@ -11,7 +11,6 @@ export default function DashboardLayout({
 }) {
   return (
     <SidebarProvider>
-      <div className="min-h-screen">
         <Sidebar>
             <div className="flex h-full flex-col">
                 <div className="flex h-16 items-center px-4 border-b">
@@ -48,7 +47,7 @@ export default function DashboardLayout({
             </div>
         </Sidebar>
         <SidebarInset>
-            <div className="flex flex-col">
+            <div className="flex flex-col min-h-screen">
                 <header className="flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6 sticky top-0 z-30">
                     <SidebarTrigger className="sm:hidden" />
                     <div className="flex-1">
@@ -61,7 +60,6 @@ export default function DashboardLayout({
                 </main>
             </div>
         </SidebarInset>
-      </div>
     </SidebarProvider>
   );
 }
