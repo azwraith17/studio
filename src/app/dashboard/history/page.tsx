@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ArrowRight, FileDown } from "lucide-react";
-import { mockTestHistory } from "@/lib/data";
+import { mockTestHistory, TestResult } from "@/lib/data";
 import { format, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -16,13 +16,35 @@ import { MoreHorizontal } from "lucide-react";
 export default function TestHistoryPage() {
   const { toast } = useToast();
 
-  const handleExport = (testId: string) => {
-    // This is a placeholder for a real export implementation
+  const handleExport = (test: TestResult) => {
     toast({
-        title: `Exporting Test ${testId}...`,
+        title: `Exporting Test ${test.id}...`,
         description: "Your results are being prepared for download.",
     });
-    console.log(`Exporting results for test ${testId}...`);
+
+    let exportContent = `Test Report: ${test.id}\n`;
+    exportContent += `Test Type: ${test.type}\n`;
+    exportContent += `Date: ${format(parseISO(test.date), "MMMM d, yyyy")}\n`;
+    exportContent += `Score: ${test.score} / ${test.maxScore}\n\n`;
+    exportContent += `AI Summary:\n${test.summary}\n\n`;
+
+    if (test.professionalAnalysis) {
+      exportContent += `--- Professional Analysis ---\n`;
+      exportContent += `Overview: ${test.professionalAnalysis.overview}\n\n`;
+      exportContent += `Symptom Analysis: ${test.professionalAnalysis.symptomAnalysis}\n\n`;
+      exportContent += `Potential Indicators: ${test.professionalAnalysis.potentialIndicators}\n\n`;
+      exportContent += `Recommendations: ${test.professionalAnalysis.recommendations}\n`;
+    }
+
+    const blob = new Blob([exportContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `MindMetrics_Test_Report_${test.id}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -53,7 +75,7 @@ export default function TestHistoryPage() {
                       <Badge variant={test.type === 'Depression' ? 'default' : 'secondary'}>{test.type}</Badge>
                   </TableCell>
                   <TableCell>{format(parseISO(test.date), "MMMM d, yyyy")}</TableCell>
-                  <TableCell>{test.score} / {test.maxScore}</TableCell>
+                  <TableCell>{test.score} / {test.type === 'Depression' ? 63 : 21}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -64,12 +86,12 @@ export default function TestHistoryPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
-                          <Link href={`/results/${test.id}?depressionScore=${test.score}`}>
+                          <Link href={`/results/${test.id}?history=true`}>
                             <ArrowRight className="mr-2 h-4 w-4" />
                             View Results
                           </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleExport(test.id)}>
+                        <DropdownMenuItem onClick={() => handleExport(test)}>
                           <FileDown className="mr-2 h-4 w-4" />
                           Export
                         </DropdownMenuItem>

@@ -1,3 +1,5 @@
+import type { ProfessionalAnalysisOutput } from "@/ai/flows/professional-analysis";
+
 export type TestResult = {
   id: string;
   type: 'Depression' | 'Anxiety';
@@ -5,7 +7,8 @@ export type TestResult = {
   score: number;
   maxScore: number;
   summary: string;
-  rawResults: string;
+  rawResults: Record<string, number>; // Changed to record for better structure
+  professionalAnalysis?: ProfessionalAnalysisOutput;
 };
 
 export const mockTestHistory: TestResult[] = [
@@ -14,18 +17,30 @@ export const mockTestHistory: TestResult[] = [
     type: 'Depression',
     date: '2024-07-15',
     score: 18,
-    maxScore: 21,
+    maxScore: 63,
     summary: 'The results indicate a moderate level of depressive symptoms. Key areas of concern include persistent sadness and significant changes in sleep patterns. It may be beneficial to monitor these symptoms closely.',
-    rawResults: 'Sadness: 2, Pessimism: 3, Loss of Pleasure: 3, Sleep Change: 3, Appetite Change: 2, Concentration: 3, Fatigue: 2'
+    rawResults: { 'd1': 2, 'd2': 3, 'd4': 3, 'd16': 3, 'd18': 2, 'd19': 3, 'd20': 2 },
+    professionalAnalysis: {
+      overview: 'The score of 18 on this BDI-based assessment suggests a moderate level of depression. The client is endorsing several clinically significant symptoms that warrant further exploration.',
+      symptomAnalysis: 'The key symptom clusters appear to be cognitive and somatic. High scores on items related to pessimism (d2), loss of pleasure (d4), and concentration difficulty (d19) point to significant cognitive distress. Somatic symptoms like changes in sleep (d16) and fatigue (d20) are also pronounced.',
+      potentialIndicators: 'The score of 3 for pessimism ("I feel my future is hopeless") is a potential red flag for hopelessness and should be carefully assessed in a clinical interview.',
+      recommendations: 'A thorough clinical interview is recommended to explore the endorsed symptoms, particularly the extent of hopelessness. A risk assessment for self-harm is warranted. It may also be useful to assess for co-occurring anxiety, given the somatic complaints.'
+    }
   },
   {
     id: 'test-002',
     type: 'Depression',
     date: '2024-06-20',
     score: 12,
-    maxScore: 21,
+    maxScore: 63,
     summary: 'The results suggest mild depressive symptoms. While the overall score is not high, some specific concerns like loss of pleasure were noted. Continued self-awareness is recommended.',
-    rawResults: 'Sadness: 1, Pessimism: 2, Loss of Pleasure: 2, Sleep Change: 2, Appetite Change: 1, Concentration: 2, Fatigue: 2'
+    rawResults: { 'd1': 1, 'd2': 2, 'd4': 2, 'd16': 2, 'd18': 1, 'd19': 2, 'd20': 2 },
+    professionalAnalysis: {
+      overview: 'The score of 12 indicates mild depression. The symptoms are likely causing some distress but may not be severely impacting daily functioning yet.',
+      symptomAnalysis: 'The client reported mild symptoms across various domains. The most notable are pessimism and loss of pleasure. There are no severe symptom clusters at this time, but the pattern suggests a developing affective episode.',
+      potentialIndicators: 'No critical items were endorsed at a high level. The results do not suggest immediate risk.',
+      recommendations: 'Psychoeducation about depression and monitoring of symptoms is recommended. Exploring the context of the "loss of pleasure" could be a good starting point for therapy. Re-assessment in a few weeks would be prudent.'
+    }
   },
   {
     id: 'test-001',
@@ -34,7 +49,13 @@ export const mockTestHistory: TestResult[] = [
     score: 9,
     maxScore: 21,
     summary: 'The results indicate mild anxiety symptoms. Feelings of nervousness were reported on several days, but overall control over worrying seems to be maintained. No immediate concerns are highlighted.',
-    rawResults: 'Nervousness: 2, Uncontrolled Worry: 1, Worrying Too Much: 2, Trouble Relaxing: 1, Restlessness: 1, Irritability: 1, Feeling Afraid: 1'
+    rawResults: { 'a1': 2, 'a2': 1, 'a3': 2, 'a4': 1, 'a5': 1, 'a6': 1, 'a7': 1 },
+    professionalAnalysis: {
+      overview: 'A score of 9 on the GAD-7 suggests mild anxiety. The individual is experiencing symptoms, but they may be manageable.',
+      symptomAnalysis: 'The primary symptoms reported are general nervousness and worrying about different things. The score for "not being able to stop or control worrying" is low, suggesting the client retains a sense of control despite the anxiety.',
+      potentialIndicators: 'No critical indicators for severe anxiety or panic were noted in these results.',
+      recommendations: 'Introduce foundational anxiety management techniques such as mindfulness or controlled breathing exercises. Further inquiry into the specific triggers for worry would be beneficial in a therapeutic setting.'
+    }
   },
 ];
 
