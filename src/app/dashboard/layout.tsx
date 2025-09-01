@@ -49,7 +49,7 @@ export default function DashboardLayout({
       </Sidebar>
       <SidebarInset>
         <div className="flex flex-col w-full min-h-screen">
-            <header className="flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6 sticky top-0 z-30">
+            <header className="flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
               <SidebarTrigger />
               <div className="flex-1">
                 {/* Can add breadcrumbs or page title here */}
