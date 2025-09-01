@@ -39,28 +39,6 @@ export default function TestsPage() {
       </div>
 
       <section className="space-y-4">
-        <h2 className="text-2xl font-semibold tracking-tight">Individual Assessments</h2>
-        <div className="grid gap-6 md:grid-cols-2">
-            {individualTests.map(test => (
-                <Card key={test.name}>
-                    <CardHeader>
-                        {test.icon}
-                        <CardTitle>{test.name}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <CardDescription>{test.description}</CardDescription>
-                    </CardContent>
-                    <CardFooter>
-                        <Button asChild>
-                            <Link href={test.href}>Start Test <ArrowRight className="ml-2 h-4 w-4"/></Link>
-                        </Button>
-                    </CardFooter>
-                </Card>
-            ))}
-        </div>
-      </section>
-      
-       <section className="space-y-4">
         <h2 className="text-2xl font-semibold tracking-tight">Featured Combinations</h2>
         <div className="grid gap-6 md:grid-cols-2">
             {combinationTests.map(test => (
@@ -82,6 +60,28 @@ export default function TestsPage() {
         </div>
       </section>
 
+      <section className="space-y-4">
+        <h2 className="text-2xl font-semibold tracking-tight">Individual Assessments</h2>
+        <div className="grid gap-6 md:grid-cols-2">
+            {individualTests.map(test => (
+                <Card key={test.name}>
+                    <CardHeader>
+                        {test.icon}
+                        <CardTitle>{test.name}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <CardDescription>{test.description}</CardDescription>
+                    </CardContent>
+                    <CardFooter>
+                        <Button asChild>
+                            <Link href={test.href}>Start Test <ArrowRight className="ml-2 h-4 w-4"/></Link>
+                        </Button>
+                    </CardFooter>
+                </Card>
+            ))}
+        </div>
+      </section>
+      
     </div>
   );
 }
