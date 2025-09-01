@@ -5,12 +5,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, FileDown } from "lucide-react";
 import { mockTestHistory } from "@/lib/data";
 import { format, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
 
 export default function TestHistoryPage() {
+  const { toast } = useToast();
+
+  const handleExport = (testId: string) => {
+    // This is a placeholder for a real export implementation
+    toast({
+        title: `Exporting Test ${testId}...`,
+        description: "Your results are being prepared for download.",
+    });
+    console.log(`Exporting results for test ${testId}...`);
+  };
+
   return (
     <div className="space-y-6">
        <div className="space-y-1">
@@ -41,11 +55,26 @@ export default function TestHistoryPage() {
                   <TableCell>{format(parseISO(test.date), "MMMM d, yyyy")}</TableCell>
                   <TableCell>{test.score} / {test.maxScore}</TableCell>
                   <TableCell className="text-right">
-                    <Button asChild variant="ghost" size="sm">
-                        <Link href={`/results/${test.id}`}>
-                        View Results <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Link href={`/results/${test.id}?depressionScore=${test.score}`}>
+                            <ArrowRight className="mr-2 h-4 w-4" />
+                            View Results
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExport(test.id)}>
+                          <FileDown className="mr-2 h-4 w-4" />
+                          Export
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))}

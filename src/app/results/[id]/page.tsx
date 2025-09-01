@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { Bot, Home, FileDown, Stethoscope } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useToast } from '@/hooks/use-toast';
 
 type Summary = {
     title: string;
@@ -26,6 +27,7 @@ type ProfessionalReport = {
 
 export default function ResultsPage() {
   const searchParams = useSearchParams();
+  const { toast } = useToast();
   const [summaries, setSummaries] = useState<Summary[]>([]);
   const [professionalReports, setProfessionalReports] = useState<ProfessionalReport[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -101,13 +103,31 @@ export default function ResultsPage() {
 
       } catch (error) {
         console.error("Error fetching results:", error);
+        toast({
+            title: "Error Generating Analysis",
+            description: "There was a problem generating the AI-powered analysis for your results.",
+            variant: "destructive",
+        });
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchResults();
-  }, [depressionScore, anxietyScore, depressionAnswers, anxietyAnswers]);
+    if ((depressionScore !== null) || (anxietyScore !== null)) {
+        fetchResults();
+    } else {
+        setIsLoading(false);
+    }
+  }, [depressionScore, anxietyScore, depressionAnswers, anxietyAnswers, toast]);
+
+  const handleExport = () => {
+    // This is a placeholder for a real export implementation
+    toast({
+        title: "Exporting...",
+        description: "Your results are being prepared for download.",
+    });
+    console.log("Exporting results...");
+  };
 
   const accountCreationUrl = `/finish-signup?name=${encodeURIComponent(name || '')}&email=${encodeURIComponent(email || '')}`;
 
@@ -143,8 +163,14 @@ export default function ResultsPage() {
                 <Progress value={(anxietyScore / maxAnxietyScore) * 100} />
               </div>
             )}
-             {depressionScore === null && anxietyScore === null && (
-                 <p className="text-muted-foreground">No score data available.</p>
+             {(depressionScore === null && anxietyScore === null) && !isLoading && (
+                 <p className="text-muted-foreground">No score data available for this result.</p>
+             )}
+              {isLoading && (
+                 <div className="space-y-4">
+                    <Skeleton className="h-6 w-1/4" />
+                    <Skeleton className="h-4 w-full" />
+                </div>
              )}
           </CardContent>
         </Card>
@@ -180,22 +206,22 @@ export default function ResultsPage() {
                     {professionalReports.map((r, index) => (
                       <AccordionItem value={`item-${index}`} key={index}>
                         <AccordionTrigger>{r.testName}</AccordionTrigger>
-                        <AccordionContent className="space-y-4">
+                        <AccordionContent className="space-y-4 p-1">
                           <div>
                             <h4 className="font-semibold">Overview</h4>
-                            <p className="text-muted-foreground">{r.report.overview}</p>
+                            <p className="text-muted-foreground text-sm">{r.report.overview}</p>
                           </div>
                            <div>
                             <h4 className="font-semibold">Symptom Analysis</h4>
-                            <p className="text-muted-foreground">{r.report.symptomAnalysis}</p>
+                            <p className="text-muted-foreground text-sm">{r.report.symptomAnalysis}</p>
                           </div>
                            <div>
                             <h4 className="font-semibold">Potential Indicators</h4>
-                            <p className="text-muted-foreground">{r.report.potentialIndicators}</p>
+                            <p className="text-muted-foreground text-sm">{r.report.potentialIndicators}</p>
                           </div>
                            <div>
                             <h4 className="font-semibold">Recommendations</h4>
-                            <p className="text-muted-foreground">{r.report.recommendations}</p>
+                            <p className="text-muted-foreground text-sm">{r.report.recommendations}</p>
                           </div>
                         </AccordionContent>
                       </AccordionItem>
@@ -222,7 +248,7 @@ export default function ResultsPage() {
               <Button asChild className="w-full sm:w-auto">
                 <Link href={accountCreationUrl}>Create Account</Link>
               </Button>
-               <Button variant="outline" className="w-full sm:w-auto">
+               <Button variant="outline" className="w-full sm:w-auto" onClick={handleExport}>
                   <FileDown className="mr-2 h-4 w-4" />
                   Export Results
                 </Button>
