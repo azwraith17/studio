@@ -6,29 +6,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import Link from "next/link";
 import { ArrowRight, Combine, FileText } from "lucide-react";
 
+const combinationTests = [
+     {
+        name: "Standard Combination",
+        description: "Take the Depression (BDI) and Anxiety (GAD-7) assessments together for a comprehensive view of your current well-being.",
+        href: "/test/depression?name=Client%20Name&email=client@example.com",
+        icon: <Combine className="w-8 h-8 mb-4 text-primary" />
+    }
+]
+
 const individualTests = [
     {
         name: "Depression (BDI)",
         description: "A 21-question assessment based on the Beck Depression Inventory to screen for symptoms of depression.",
-        href: "/start-test",
+        href: "/test/depression?name=Client%20Name&email=client@example.com",
         icon: <FileText className="w-8 h-8 mb-4 text-primary" />
     },
     {
         name: "Anxiety (GAD-7)",
         description: "A 7-question assessment based on the GAD-7 scale to screen for symptoms of generalized anxiety disorder.",
-        href: "/test/anxiety-start", // We will need to create a start page for anxiety
+        href: "/test/anxiety?name=Client%20Name&email=client@example.com",
         icon: <FileText className="w-8 h-8 mb-4 text-primary" />
     }
 ]
 
-const combinationTests = [
-     {
-        name: "Standard Combination",
-        description: "Take the Depression (BDI) and Anxiety (GAD-7) assessments together for a comprehensive view of your current well-being.",
-        href: "/start-test",
-        icon: <Combine className="w-8 h-8 mb-4 text-primary" />
-    }
-]
 
 export default function TestsPage() {
   return (
