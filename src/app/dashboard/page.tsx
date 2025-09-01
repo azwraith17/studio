@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
+import { Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend } from "recharts";
 import { mockTestHistory } from "@/lib/data";
 import { format, parseISO } from "date-fns";
 
@@ -15,13 +15,18 @@ const chartData = mockTestHistory
   .reverse()
   .map(test => ({
     date: format(parseISO(test.date), "MMM d"),
-    score: test.score,
+    depression: test.type === 'Depression' ? test.score : null,
+    anxiety: test.type === 'Anxiety' ? test.score : null,
   }));
 
 const chartConfig = {
-  score: {
-    label: "Score",
+  depression: {
+    label: "Depression",
     color: "hsl(var(--primary))",
+  },
+  anxiety: {
+    label: "Anxiety",
+    color: "hsl(var(--chart-2))",
   },
 };
 
@@ -71,17 +76,28 @@ export default function ClientDashboard() {
                     tickLine={false}
                     axisLine={false}
                     tickMargin={8}
+                    domain={[0, 'dataMax + 5']}
                   />
                   <ChartTooltip
                     cursor={false}
                     content={<ChartTooltipContent indicator="dot" />}
                   />
+                  <Legend />
                   <Line
-                    dataKey="score"
+                    dataKey="depression"
                     type="monotone"
-                    stroke="var(--color-score)"
+                    stroke="var(--color-depression)"
                     strokeWidth={2}
-                    dot={false}
+                    dot={true}
+                    connectNulls={false}
+                  />
+                   <Line
+                    dataKey="anxiety"
+                    type="monotone"
+                    stroke="var(--color-anxiety)"
+                    strokeWidth={2}
+                    dot={true}
+                    connectNulls={false}
                   />
                 </LineChart>
               </ChartContainer>
