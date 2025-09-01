@@ -1,3 +1,4 @@
+
 import { Logo } from "@/components/logo";
 import { UserNav } from "@/components/user-nav";
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset } from "@/components/ui/sidebar";
@@ -11,55 +12,55 @@ export default function DashboardLayout({
 }) {
   return (
     <SidebarProvider>
-        <Sidebar>
-            <div className="flex h-full flex-col">
-                <div className="flex h-16 items-center px-4 border-b">
-                    <Logo />
-                </div>
-                <div className="flex-1 overflow-y-auto">
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton asChild isActive>
-                            <Link href="/dashboard"><LayoutDashboard />Dashboard</Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                             <Link href="/dashboard"><History />Test History</Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                         <SidebarMenuButton asChild>
-                             <Link href="/dashboard"><User />Profile</Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
-                </div>
-                <div className="mt-auto p-4">
-                  <SidebarMenu>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link href="/"><LogOut />Logout</Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenu>
-                </div>
+      <Sidebar>
+        <div className="flex h-full flex-col">
+          <div className="flex h-16 items-center px-4 border-b">
+            <Logo />
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/dashboard"><LayoutDashboard />Dashboard</Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/dashboard/history"><History />Test History</Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/dashboard/profile"><User />Profile</Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </div>
+          <div className="mt-auto p-4">
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/"><LogOut />Logout</Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </div>
+        </div>
+      </Sidebar>
+      <SidebarInset>
+        <div className="flex flex-col min-h-screen">
+          <header className="flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6 sticky top-0 z-30">
+            <SidebarTrigger className="sm:hidden" />
+            <div className="flex-1">
+              {/* Can add breadcrumbs or page title here */}
             </div>
-        </Sidebar>
-        <SidebarInset>
-            <div className="flex flex-col min-h-screen">
-                <header className="flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6 sticky top-0 z-30">
-                    <SidebarTrigger className="sm:hidden" />
-                    <div className="flex-1">
-                        {/* Can add breadcrumbs or page title here */}
-                    </div>
-                    <UserNav />
-                </header>
-                <main className="flex-1 p-4 sm:p-6">
-                    {children}
-                </main>
-            </div>
-        </SidebarInset>
+            <UserNav />
+          </header>
+          <main className="flex-1 p-4 sm:p-6">
+            {children}
+          </main>
+        </div>
+      </SidebarInset>
     </SidebarProvider>
   );
 }

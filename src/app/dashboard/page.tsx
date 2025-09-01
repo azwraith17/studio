@@ -3,10 +3,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { ArrowRight, PlusCircle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
 import { mockTestHistory } from "@/lib/data";
@@ -43,93 +41,54 @@ export default function ClientDashboard() {
         </Button>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle>Your Progress</CardTitle>
-            <CardDescription>This chart shows your test scores over time.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <ChartContainer config={chartConfig}>
-                  <LineChart
-                    accessibilityLayer
-                    data={chartData}
-                    margin={{
-                      top: 5,
-                      right: 20,
-                      left: -10,
-                      bottom: 5,
-                    }}
-                  >
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                      dataKey="date"
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={8}
-                    />
-                     <YAxis
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={8}
-                    />
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent indicator="dot" />}
-                    />
-                    <Line
-                      dataKey="score"
-                      type="monotone"
-                      stroke="var(--color-score)"
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  </LineChart>
-                </ChartContainer>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle>Test History</CardTitle>
-            <CardDescription>View your previously completed assessments.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Test Type</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Score</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockTestHistory.map((test) => (
-                  <TableRow key={test.id}>
-                    <TableCell className="font-medium">
-                       <Badge variant={test.type === 'Depression' ? 'default' : 'secondary'}>{test.type}</Badge>
-                    </TableCell>
-                    <TableCell>{format(parseISO(test.date), "MMMM d, yyyy")}</TableCell>
-                    <TableCell>{test.score} / {test.maxScore}</TableCell>
-                    <TableCell className="text-right">
-                      <Button asChild variant="ghost" size="sm">
-                         <Link href={`/results/${test.id}`}>
-                          View Results <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Your Progress</CardTitle>
+          <CardDescription>This chart shows your test scores over time.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <ChartContainer config={chartConfig}>
+                <LineChart
+                  accessibilityLayer
+                  data={chartData}
+                  margin={{
+                    top: 5,
+                    right: 20,
+                    left: -10,
+                    bottom: 5,
+                  }}
+                >
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                  />
+                    <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                  />
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="dot" />}
+                  />
+                  <Line
+                    dataKey="score"
+                    type="monotone"
+                    stroke="var(--color-score)"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </LineChart>
+              </ChartContainer>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
