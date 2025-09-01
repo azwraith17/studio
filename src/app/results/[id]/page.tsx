@@ -4,11 +4,11 @@ import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { summarizeTestResults } from '@/ai/flows/summarize-test-results';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
-import { Bot, Home } from 'lucide-react';
+import { Bot, Home, FileDown } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 type Summary = {
@@ -23,6 +23,8 @@ export default function ResultsPage() {
 
   const depressionScore = useMemo(() => searchParams.get('depressionScore') ? Number(searchParams.get('depressionScore')) : null, [searchParams]);
   const anxietyScore = useMemo(() => searchParams.get('anxietyScore') ? Number(searchParams.get('anxietyScore')) : null, [searchParams]);
+  const name = useMemo(() => searchParams.get('name'), [searchParams]);
+  const email = useMemo(() => searchParams.get('email'), [searchParams]);
   
   // These are simplified max scores for the demo tests
   const maxDepressionScore = 21; 
@@ -59,6 +61,8 @@ export default function ResultsPage() {
 
     fetchSummaries();
   }, [depressionScore, anxietyScore]);
+
+  const accountCreationUrl = `/finish-signup?name=${encodeURIComponent(name || '')}&email=${encodeURIComponent(email || '')}`;
 
   return (
     <div className="container mx-auto max-w-4xl p-4 py-8">
@@ -120,6 +124,29 @@ export default function ResultsPage() {
               </AlertDescription>
             </Alert>
           ))
+        )}
+
+        {name && email && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Save Your Progress</CardTitle>
+              <CardDescription>Create an account to track your results over time and gain deeper insights.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Your results for <span className="font-semibold text-foreground">{name}</span> ({email}) will be saved upon account creation.
+              </p>
+            </CardContent>
+            <CardFooter className="flex-col sm:flex-row gap-2">
+              <Button asChild className="w-full sm:w-auto">
+                <Link href={accountCreationUrl}>Create Account</Link>
+              </Button>
+               <Button variant="outline" className="w-full sm:w-auto">
+                  <FileDown className="mr-2 h-4 w-4" />
+                  Export Results
+                </Button>
+            </CardFooter>
+          </Card>
         )}
         
         <Alert variant="destructive">

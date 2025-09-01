@@ -20,6 +20,9 @@ export default function AnxietyTestPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const totalQuestions = anxietyQuestions.length;
   const currentQuestion: Question = anxietyQuestions[currentQuestionIndex];
+  
+  const name = searchParams.get('name') || '';
+  const email = searchParams.get('email') || '';
 
   const handleAnswerChange = (questionId: string, score: number) => {
     setAnswers((prev) => ({ ...prev, [questionId]: score }));
@@ -59,9 +62,14 @@ export default function AnxietyTestPage() {
       description: "Redirecting to your results.",
     });
 
-    // In a real app, you would save both test results under a single session or link them.
-    // Here we'll just pass all data to the results page.
-    router.push(`/results/${fromTestId}?anxietyScore=${totalScore}&depressionScore=${depressionScore}`);
+    const queryParams = new URLSearchParams({
+      name,
+      email,
+      depressionScore: depressionScore || '',
+      anxietyScore: totalScore.toString(),
+    });
+
+    router.push(`/results/${fromTestId}?${queryParams.toString()}`);
     
   };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { anxietyTestTrigger } from '@/ai/flows/anxiety-test-trigger';
 import { depressionQuestions, Question } from '@/lib/questions';
 import { Button } from '@/components/ui/button';
@@ -14,12 +14,16 @@ import { Loader2 } from 'lucide-react';
 
 export default function DepressionTestPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const totalQuestions = depressionQuestions.length;
   const currentQuestion: Question = depressionQuestions[currentQuestionIndex];
+
+  const name = searchParams.get('name') || '';
+  const email = searchParams.get('email') || '';
 
   const handleAnswerChange = (questionId: string, score: number) => {
     setAnswers((prev) => ({ ...prev, [questionId]: score }));
@@ -55,6 +59,11 @@ export default function DepressionTestPage() {
     try {
       const result = await anxietyTestTrigger({ depressionTestScore: totalScore });
       const newTestId = `test-${Date.now()}`; // Mock test ID
+      const queryParams = new URLSearchParams({
+        name,
+        email,
+        depressionScore: totalScore.toString(),
+      });
 
       if (result.triggerAnxietyTest) {
         toast({
@@ -62,13 +71,13 @@ export default function DepressionTestPage() {
           description: "Based on your results, we recommend a brief anxiety assessment.",
         });
         // Pass depression test data to anxiety test page via query params or state management
-        router.push(`/test/anxiety?fromTest=${newTestId}&score=${totalScore}`);
+        router.push(`/test/anxiety?fromTest=${newTestId}&score=${totalScore}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`);
       } else {
         toast({
           title: "Test complete!",
           description: "Redirecting to your results.",
         });
-        router.push(`/results/${newTestId}?score=${totalScore}&type=Depression`);
+        router.push(`/results/${newTestId}?${queryParams.toString()}`);
       }
     } catch (error) {
       console.error("Error triggering anxiety test:", error);

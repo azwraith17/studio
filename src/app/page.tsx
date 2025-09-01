@@ -41,7 +41,7 @@ export default function Home() {
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
                 <Button asChild size="lg">
-                  <Link href="/signup">Get Started</Link>
+                  <Link href="/start-test">Get Started</Link>
                 </Button>
               </div>
             </div>
@@ -85,7 +85,7 @@ export default function Home() {
                 <CardContent className="p-6">
                   <History className="w-10 h-10 mb-4 text-primary" />
                   <h3 className="text-xl font-bold">3. Track Your Progress</h3>
-                  <p className="text-muted-foreground mt-2">See your test history and track how your well-being changes over time through your personal dashboard.</p>
+                  <p className="text-muted-foreground mt-2">Create an account to see your test history and track how your well-being changes over time.</p>
                 </CardContent>
               </Card>
             </div>
