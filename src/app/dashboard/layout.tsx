@@ -20,18 +20,18 @@ export default function DashboardLayout({
           <div className="flex-1 overflow-y-auto">
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/dashboard"><LayoutDashboard />Dashboard</Link>
+                <SidebarMenuButton asChild tooltip="Dashboard">
+                  <Link href="/dashboard"><LayoutDashboard /><span>Dashboard</span></Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/dashboard/history"><History />Test History</Link>
+                <SidebarMenuButton asChild tooltip="Test History">
+                  <Link href="/dashboard/history"><History /><span>Test History</span></Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/dashboard/profile"><User />Profile</Link>
+                <SidebarMenuButton asChild tooltip="Profile">
+                  <Link href="/dashboard/profile"><User /><span>Profile</span></Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -39,8 +39,8 @@ export default function DashboardLayout({
           <div className="mt-auto p-4 border-t">
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/"><LogOut />Logout</Link>
+                <SidebarMenuButton asChild tooltip="Logout">
+                  <Link href="/"><LogOut /><span>Logout</span></Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -49,7 +49,7 @@ export default function DashboardLayout({
       </Sidebar>
       <div className="flex flex-col w-full min-h-screen">
           <header className="flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6 sticky top-0 z-30">
-            <SidebarTrigger className="sm:hidden" />
+            <SidebarTrigger />
             <div className="flex-1">
               {/* Can add breadcrumbs or page title here */}
             </div>
