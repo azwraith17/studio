@@ -47,20 +47,20 @@ export default function DashboardLayout({
           </div>
         </div>
       </Sidebar>
-      <div className="flex flex-col w-full min-h-screen">
-          <header className="flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6 sticky top-0 z-30">
-            <SidebarTrigger />
-            <div className="flex-1">
-              {/* Can add breadcrumbs or page title here */}
-            </div>
-            <UserNav />
-          </header>
-          <main className="flex-1 p-4 sm:p-6 bg-muted/40">
-            <SidebarInset>
+      <SidebarInset>
+        <div className="flex flex-col w-full min-h-screen">
+            <header className="flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6 sticky top-0 z-30">
+              <SidebarTrigger />
+              <div className="flex-1">
+                {/* Can add breadcrumbs or page title here */}
+              </div>
+              <UserNav />
+            </header>
+            <main className="flex-1 p-4 sm:p-6 bg-muted/40">
                 {children}
-            </SidebarInset>
-          </main>
-      </div>
+            </main>
+        </div>
+      </SidebarInset>
     </SidebarProvider>
   );
 }
