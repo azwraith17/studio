@@ -18,7 +18,7 @@ export default function DepressionTestPage() {
   const { toast } = useToast();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
-  const [currentAnswer, setCurrentAnswer] = useState<number | undefined>(undefined);
+  const [currentAnswer, setCurrentAnswer] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const totalQuestions = depressionQuestions.length;
   const currentQuestion: Question = depressionQuestions[currentQuestionIndex];
@@ -31,7 +31,7 @@ export default function DepressionTestPage() {
   };
 
   const handleNext = () => {
-    if (currentAnswer === undefined) {
+    if (currentAnswer === null) {
       toast({
         title: "Please select an answer",
         description: "You must select an option before proceeding.",
@@ -40,14 +40,14 @@ export default function DepressionTestPage() {
       return;
     }
     setAnswers((prev) => ({ ...prev, [currentQuestion.id]: currentAnswer }));
-    setCurrentAnswer(undefined);
+    setCurrentAnswer(null);
     if (currentQuestionIndex < totalQuestions - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     }
   };
 
   const handleSubmit = async () => {
-    if (currentAnswer === undefined) {
+    if (currentAnswer === null) {
         toast({
           title: "Please select an answer",
           description: "You must select an option before proceeding.",

@@ -17,7 +17,7 @@ export default function AnxietyTestPage() {
   const { toast } = useToast();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
-  const [currentAnswer, setCurrentAnswer] = useState<number | undefined>(undefined);
+  const [currentAnswer, setCurrentAnswer] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const totalQuestions = anxietyQuestions.length;
   const currentQuestion: Question = anxietyQuestions[currentQuestionIndex];
@@ -30,7 +30,7 @@ export default function AnxietyTestPage() {
   };
 
   const handleNext = () => {
-    if (currentAnswer === undefined) {
+    if (currentAnswer === null) {
       toast({
         title: "Please select an answer",
         description: "You must select an option before proceeding.",
@@ -39,14 +39,14 @@ export default function AnxietyTestPage() {
       return;
     }
     setAnswers((prev) => ({ ...prev, [currentQuestion.id]: currentAnswer }));
-    setCurrentAnswer(undefined);
+    setCurrentAnswer(null);
     if (currentQuestionIndex < totalQuestions - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     }
   };
 
   const handleSubmit = async () => {
-     if (currentAnswer === undefined) {
+     if (currentAnswer === null) {
         toast({
           title: "Please select an answer",
           description: "You must select an option before proceeding.",
