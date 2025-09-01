@@ -3,64 +3,111 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { summarizeTestResults } from '@/ai/flows/summarize-test-results';
+import { professionalAnalysis, ProfessionalAnalysisOutput } from '@/ai/flows/professional-analysis';
+import { depressionQuestions, anxietyQuestions, Question } from '@/lib/questions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
-import { Bot, Home, FileDown } from 'lucide-react';
+import { Bot, Home, FileDown, Stethoscope } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 type Summary = {
     title: string;
     summary: string;
 }
 
+type ProfessionalReport = {
+    testName: string;
+    report: ProfessionalAnalysisOutput;
+}
+
 export default function ResultsPage() {
   const searchParams = useSearchParams();
   const [summaries, setSummaries] = useState<Summary[]>([]);
+  const [professionalReports, setProfessionalReports] = useState<ProfessionalReport[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const depressionScore = useMemo(() => searchParams.get('depressionScore') ? Number(searchParams.get('depressionScore')) : null, [searchParams]);
-  const anxietyScore = useMemo(() => searchParams.get('anxietyScore') ? Number(searchParams.get('anxietyScore')) : null, [searchParams]);
   const name = useMemo(() => searchParams.get('name'), [searchParams]);
   const email = useMemo(() => searchParams.get('email'), [searchParams]);
   
-  // These are simplified max scores for the demo tests
+  // Scores
+  const depressionScore = useMemo(() => searchParams.get('depressionScore') ? Number(searchParams.get('depressionScore')) : null, [searchParams]);
+  const anxietyScore = useMemo(() => searchParams.get('anxietyScore') ? Number(searchParams.get('anxietyScore')) : null, [searchParams]);
+  
+  // Answers
+  const depressionAnswers = useMemo(() => searchParams.get('depressionAnswers') ? JSON.parse(searchParams.get('depressionAnswers')!) : null, [searchParams]);
+  const anxietyAnswers = useMemo(() => searchParams.get('anxietyAnswers') ? JSON.parse(searchParams.get('anxietyAnswers')!) : null, [searchParams]);
+  
+  // Max scores
   const maxDepressionScore = 63; 
   const maxAnxietyScore = 21;
 
   useEffect(() => {
-    const fetchSummaries = async () => {
+    const fetchResults = async () => {
       setIsLoading(true);
       const newSummaries: Summary[] = [];
+      const newReports: ProfessionalReport[] = [];
       
       try {
-        if (depressionScore !== null) {
-          const depressionResult = await summarizeTestResults({
+        if (depressionScore !== null && depressionAnswers !== null) {
+          const simpleSummary = await summarizeTestResults({
             testName: 'Depression (BDI-based)',
             results: `The user scored ${depressionScore} out of ${maxDepressionScore}.`,
           });
-          newSummaries.push({ title: 'Depression Test Summary', summary: depressionResult.summary });
+          newSummaries.push({ title: 'Depression Test Summary', summary: simpleSummary.summary });
+
+          const depressionQuestionsMap = depressionQuestions.reduce((acc, q) => {
+            acc[q.id] = q.text;
+            return acc;
+          }, {} as Record<string, string>);
+
+          const proAnalysis = await professionalAnalysis({
+            testName: 'Depression (BDI-based)',
+            answers: depressionAnswers,
+            questions: depressionQuestionsMap,
+            score: depressionScore,
+            maxScore: maxDepressionScore,
+          });
+          newReports.push({ testName: 'Depression (BDI-based)', report: proAnalysis });
         }
-        if (anxietyScore !== null) {
-          const anxietyResult = await summarizeTestResults({
+
+        if (anxietyScore !== null && anxietyAnswers !== null) {
+          const simpleSummary = await summarizeTestResults({
             testName: 'Anxiety (GAD-7-based)',
             results: `The user scored ${anxietyScore} out of ${maxAnxietyScore}.`,
           });
-          newSummaries.push({ title: 'Anxiety Test Summary', summary: anxietyResult.summary });
+          newSummaries.push({ title: 'Anxiety Test Summary', summary: simpleSummary.summary });
+          
+          const anxietyQuestionsMap = anxietyQuestions.reduce((acc, q) => {
+            acc[q.id] = q.text;
+            return acc;
+          }, {} as Record<string, string>);
+
+          const proAnalysis = await professionalAnalysis({
+            testName: 'Anxiety (GAD-7-based)',
+            answers: anxietyAnswers,
+            questions: anxietyQuestionsMap,
+            score: anxietyScore,
+            maxScore: maxAnxietyScore,
+          });
+          newReports.push({ testName: 'Anxiety (GAD-7-based)', report: proAnalysis });
         }
+        
         setSummaries(newSummaries);
+        setProfessionalReports(newReports);
+
       } catch (error) {
-        console.error("Error fetching summaries:", error);
-        // Set a default error message
+        console.error("Error fetching results:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchSummaries();
-  }, [depressionScore, anxietyScore]);
+    fetchResults();
+  }, [depressionScore, anxietyScore, depressionAnswers, anxietyAnswers]);
 
   const accountCreationUrl = `/finish-signup?name=${encodeURIComponent(name || '')}&email=${encodeURIComponent(email || '')}`;
 
@@ -104,26 +151,60 @@ export default function ResultsPage() {
 
         {isLoading ? (
           <Card>
-            <CardHeader>
-              <CardTitle>AI-Powered Summary</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Generating Analysis...</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <Skeleton className="h-4 w-1/4" />
               <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-8 w-full mt-4" />
             </CardContent>
           </Card>
         ) : (
-          summaries.map((s, index) => (
-            <Alert key={index}>
-              <Bot className="h-4 w-4" />
-              <AlertTitle>{s.title}</AlertTitle>
-              <AlertDescription>
-                {s.summary}
-              </AlertDescription>
-            </Alert>
-          ))
+          <div className="space-y-4">
+            {summaries.map((s, index) => (
+              <Alert key={index}>
+                <Bot className="h-4 w-4" />
+                <AlertTitle>{s.title}</AlertTitle>
+                <AlertDescription>{s.summary}</AlertDescription>
+              </Alert>
+            ))}
+
+            {professionalReports.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Stethoscope/> Professional Analysis</CardTitle>
+                  <CardDescription>A detailed clinical breakdown of the results for healthcare providers.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Accordion type="single" collapsible className="w-full">
+                    {professionalReports.map((r, index) => (
+                      <AccordionItem value={`item-${index}`} key={index}>
+                        <AccordionTrigger>{r.testName}</AccordionTrigger>
+                        <AccordionContent className="space-y-4">
+                          <div>
+                            <h4 className="font-semibold">Overview</h4>
+                            <p className="text-muted-foreground">{r.report.overview}</p>
+                          </div>
+                           <div>
+                            <h4 className="font-semibold">Symptom Analysis</h4>
+                            <p className="text-muted-foreground">{r.report.symptomAnalysis}</p>
+                          </div>
+                           <div>
+                            <h4 className="font-semibold">Potential Indicators</h4>
+                            <p className="text-muted-foreground">{r.report.potentialIndicators}</p>
+                          </div>
+                           <div>
+                            <h4 className="font-semibold">Recommendations</h4>
+                            <p className="text-muted-foreground">{r.report.recommendations}</p>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         )}
 
         {name && email && (

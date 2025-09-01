@@ -18,7 +18,6 @@ export default function DepressionTestPage() {
   const { toast } = useToast();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
-  const [currentAnswer, setCurrentAnswer] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const totalQuestions = depressionQuestions.length;
   const currentQuestion: Question = depressionQuestions[currentQuestionIndex];
@@ -27,11 +26,11 @@ export default function DepressionTestPage() {
   const email = searchParams.get('email') || '';
 
   const handleAnswerChange = (value: string) => {
-    setCurrentAnswer(parseInt(value));
+    setAnswers((prev) => ({ ...prev, [currentQuestion.id]: parseInt(value) }));
   };
 
   const handleNext = () => {
-    if (currentAnswer === null) {
+    if (answers[currentQuestion.id] === undefined) {
       toast({
         title: "Please select an answer",
         description: "You must select an option before proceeding.",
@@ -39,16 +38,14 @@ export default function DepressionTestPage() {
       });
       return;
     }
-    setAnswers((prev) => ({ ...prev, [currentQuestion.id]: currentAnswer }));
     
     if (currentQuestionIndex < totalQuestions - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     }
-    setCurrentAnswer(null); // Reset for the next question
   };
 
   const handleSubmit = async () => {
-    if (currentAnswer === null) {
+    if (answers[currentQuestion.id] === undefined) {
         toast({
           title: "Please select an answer",
           description: "You must select an option before proceeding.",
@@ -57,30 +54,42 @@ export default function DepressionTestPage() {
         return;
     }
     
-    const finalAnswers = { ...answers, [currentQuestion.id]: currentAnswer };
     setIsSubmitting(true);
-    const totalScore = Object.values(finalAnswers).reduce((sum, score) => sum + score, 0);
+    const totalScore = Object.values(answers).reduce((sum, score) => sum + score, 0);
 
     try {
       const result = await anxietyTestTrigger({ depressionTestScore: totalScore });
       const newTestId = `test-${Date.now()}`; // Mock test ID
-      const queryParams = new URLSearchParams({
-        name,
-        email,
-        depressionScore: totalScore.toString(),
-      });
+      
+      const depressionAnswersStr = JSON.stringify(answers);
 
       if (result.triggerAnxietyTest) {
         toast({
           title: "Depression test complete",
           description: "Based on your results, we recommend a brief anxiety assessment.",
         });
-        // Pass depression test data to anxiety test page via query params or state management
-        router.push(`/test/anxiety?fromTest=${newTestId}&score=${totalScore}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`);
+        
+        const queryParams = new URLSearchParams({
+          fromTest: newTestId,
+          score: totalScore.toString(),
+          name: name,
+          email: email,
+          depressionAnswers: depressionAnswersStr,
+        });
+
+        router.push(`/test/anxiety?${queryParams.toString()}`);
+
       } else {
         toast({
           title: "Test complete!",
           description: "Redirecting to your results.",
+        });
+
+        const queryParams = new URLSearchParams({
+          name,
+          email,
+          depressionScore: totalScore.toString(),
+          depressionAnswers: depressionAnswersStr,
         });
         router.push(`/results/${newTestId}?${queryParams.toString()}`);
       }
@@ -111,8 +120,8 @@ export default function DepressionTestPage() {
           <div className="space-y-4">
             <Label className="text-lg font-semibold">{currentQuestion.text}</Label>
             <RadioGroup
-              key={currentQuestionIndex}
-              value={currentAnswer?.toString()}
+              key={currentQuestion.id}
+              value={answers[currentQuestion.id]?.toString()}
               onValueChange={handleAnswerChange}
               className="space-y-2"
             >

@@ -17,7 +17,6 @@ export default function AnxietyTestPage() {
   const { toast } = useToast();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
-  const [currentAnswer, setCurrentAnswer] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const totalQuestions = anxietyQuestions.length;
   const currentQuestion: Question = anxietyQuestions[currentQuestionIndex];
@@ -26,11 +25,11 @@ export default function AnxietyTestPage() {
   const email = searchParams.get('email') || '';
 
   const handleAnswerChange = (value: string) => {
-    setCurrentAnswer(parseInt(value));
+    setAnswers((prev) => ({ ...prev, [currentQuestion.id]: parseInt(value) }));
   };
 
   const handleNext = () => {
-    if (currentAnswer === null) {
+    if (answers[currentQuestion.id] === undefined) {
       toast({
         title: "Please select an answer",
         description: "You must select an option before proceeding.",
@@ -38,16 +37,14 @@ export default function AnxietyTestPage() {
       });
       return;
     }
-    setAnswers((prev) => ({ ...prev, [currentQuestion.id]: currentAnswer }));
     
     if (currentQuestionIndex < totalQuestions - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     }
-    setCurrentAnswer(null); // Reset for the next question
   };
 
   const handleSubmit = async () => {
-     if (currentAnswer === null) {
+     if (answers[currentQuestion.id] === undefined) {
         toast({
           title: "Please select an answer",
           description: "You must select an option before proceeding.",
@@ -57,10 +54,11 @@ export default function AnxietyTestPage() {
     }
 
     setIsSubmitting(true);
-    const finalAnswers = { ...answers, [currentQuestion.id]: currentAnswer };
-    const totalScore = Object.values(finalAnswers).reduce((sum, score) => sum + score, 0);
+    const totalScore = Object.values(answers).reduce((sum, score) => sum + score, 0);
     const fromTestId = searchParams.get('fromTest') || `test-${Date.now()}`;
     const depressionScore = searchParams.get('score');
+    const depressionAnswers = searchParams.get('depressionAnswers');
+    const anxietyAnswersStr = JSON.stringify(answers);
 
     toast({
       title: "Test complete!",
@@ -72,7 +70,12 @@ export default function AnxietyTestPage() {
       email,
       depressionScore: depressionScore || '',
       anxietyScore: totalScore.toString(),
+      anxietyAnswers: anxietyAnswersStr,
     });
+
+    if (depressionAnswers) {
+      queryParams.set('depressionAnswers', depressionAnswers);
+    }
 
     router.push(`/results/${fromTestId}?${queryParams.toString()}`);
     
@@ -94,8 +97,8 @@ export default function AnxietyTestPage() {
           <div className="space-y-4">
             <Label className="text-lg font-semibold">Over the last 2 weeks, how often have you been bothered by the following problem? <br/> "{currentQuestion.text}"</Label>
             <RadioGroup
-              key={currentQuestionIndex}
-              value={currentAnswer?.toString()}
+              key={currentQuestion.id}
+              value={answers[currentQuestion.id]?.toString()}
               onValueChange={handleAnswerChange}
               className="space-y-2"
             >
