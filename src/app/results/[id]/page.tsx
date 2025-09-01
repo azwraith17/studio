@@ -5,7 +5,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { summarizeTestResults } from '@/ai/flows/summarize-test-results';
 import { professionalAnalysis, ProfessionalAnalysisOutput } from '@/ai/flows/professional-analysis';
-import { depressionQuestions, anxietyQuestions, Question } from '@/lib/questions';
+import { depressionQuestions, anxietyQuestions } from '@/lib/questions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -16,15 +16,12 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from '@/hooks/use-toast';
 import { mockTestHistory, TestResult } from '@/lib/data';
+import { format, parseISO } from 'date-fns';
 
-type Summary = {
-    title: string;
+type AnalysisData = {
     summary: string;
-}
-
-type ProfessionalReport = {
-    testName: string;
-    report: ProfessionalAnalysisOutput;
+    professionalReport: ProfessionalAnalysisOutput;
+    testData: TestResult;
 }
 
 export default function ResultsPage() {
@@ -32,15 +29,13 @@ export default function ResultsPage() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   
-  const [summary, setSummary] = useState<string | null>(null);
-  const [professionalReport, setProfessionalReport] = useState<ProfessionalAnalysisOutput | null>(null);
-  const [testData, setTestData] = useState<TestResult | null>(null);
+  const [depressionAnalysis, setDepressionAnalysis] = useState<AnalysisData | null>(null);
+  const [anxietyAnalysis, setAnxietyAnalysis] = useState<AnalysisData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const testId = params.id as string;
   const isFromHistory = searchParams.get('history') === 'true';
 
-  // Memoize values from URL search params for new tests
   const newTestInfo = useMemo(() => ({
     name: searchParams.get('name'),
     email: searchParams.get('email'),
@@ -57,74 +52,66 @@ export default function ResultsPage() {
         if (isFromHistory) {
           const historicTest = mockTestHistory.find(t => t.id === testId);
           if (historicTest) {
-            setTestData(historicTest);
-            setSummary(historicTest.summary);
-            if (historicTest.professionalAnalysis) {
-              setProfessionalReport(historicTest.professionalAnalysis);
+            const analysisData: AnalysisData = {
+              summary: historicTest.summary,
+              professionalReport: historicTest.professionalAnalysis!,
+              testData: historicTest,
+            };
+            if (historicTest.type === 'Depression') {
+              setDepressionAnalysis(analysisData);
+            } else {
+              setAnxietyAnalysis(analysisData);
             }
           } else {
              toast({ title: "Error", description: "Test result not found.", variant: "destructive" });
           }
         } else {
-          // This is a new test result, generate analysis
-          let score, maxScore, answers, testName, questions;
-          
+          // This is a new test result, generate analysis for all available data
+          const generateAnalysis = async (score: number, maxScore: number, answers: Record<string, number>, testName: 'Depression' | 'Anxiety') => {
+            const questions = testName === 'Depression' ? depressionQuestions : anxietyQuestions;
+            const simpleSummaryRes = await summarizeTestResults({
+              testName: `${testName} Test`,
+              results: `The user scored ${score} out of ${maxScore}.`,
+            });
+
+            const questionsMap = questions.reduce((acc, q) => {
+              acc[q.id] = q.text;
+              return acc;
+            }, {} as Record<string, string>);
+
+            const proAnalysis = await professionalAnalysis({
+              testName: `${testName} (${testName === 'Depression' ? 'BDI' : 'GAD-7'}-based)`,
+              answers: answers,
+              questions: questionsMap,
+              score: score,
+              maxScore: maxScore,
+            });
+            
+            return {
+                summary: simpleSummaryRes.summary,
+                professionalReport: proAnalysis,
+                testData: {
+                    id: testId,
+                    type: testName,
+                    date: new Date().toISOString(),
+                    score: score,
+                    maxScore: maxScore,
+                    rawResults: answers,
+                    summary: simpleSummaryRes.summary,
+                    professionalAnalysis: proAnalysis,
+                }
+            };
+          };
+
           if (newTestInfo.depressionScore !== null) {
-            score = newTestInfo.depressionScore;
-            maxScore = 63;
-            answers = newTestInfo.depressionAnswers;
-            testName = 'Depression (BDI-based)';
-            questions = depressionQuestions;
-          } else if (newTestInfo.anxietyScore !== null) {
-            score = newTestInfo.anxietyScore;
-            maxScore = 21;
-            answers = newTestInfo.anxietyAnswers;
-            testName = 'Anxiety (GAD-7-based)';
-            questions = anxietyQuestions;
-          } else {
-            setIsLoading(false);
-            return;
+            const analysis = await generateAnalysis(newTestInfo.depressionScore, 63, newTestInfo.depressionAnswers, 'Depression');
+            setDepressionAnalysis(analysis);
           }
 
-          setTestData({
-            id: testId,
-            type: testName.includes('Depression') ? 'Depression' : 'Anxiety',
-            date: new Date().toISOString(),
-            score: score,
-            maxScore: maxScore,
-            rawResults: answers,
-            summary: '', // will be generated
-          });
-
-          const simpleSummaryRes = await summarizeTestResults({
-            testName: testName,
-            results: `The user scored ${score} out of ${maxScore}.`,
-          });
-          setSummary(simpleSummaryRes.summary);
-
-          const questionsMap = questions.reduce((acc, q) => {
-            acc[q.id] = q.text;
-            return acc;
-          }, {} as Record<string, string>);
-
-          const proAnalysis = await professionalAnalysis({
-            testName: testName,
-            answers: answers,
-            questions: questionsMap,
-            score: score,
-            maxScore: maxScore,
-          });
-          setProfessionalReport(proAnalysis);
-
-          // Here you would typically save the full result to a database.
-          // For now, we update our "mock" state to include the generated analysis
-          // so it can be exported immediately.
-          setTestData(prev => prev ? {
-             ...prev,
-             summary: simpleSummaryRes.summary,
-             professionalAnalysis: proAnalysis
-            } : null);
-
+          if (newTestInfo.anxietyScore !== null) {
+            const analysis = await generateAnalysis(newTestInfo.anxietyScore, 21, newTestInfo.anxietyAnswers, 'Anxiety');
+            setAnxietyAnalysis(analysis);
+          }
         }
       } catch (error) {
         console.error("Error fetching results:", error);
@@ -142,37 +129,43 @@ export default function ResultsPage() {
   }, [testId, isFromHistory, newTestInfo, toast]);
 
   const handleExport = () => {
-    if (!testData) {
-        toast({ title: "Error", description: "No data to export.", variant: "destructive" });
-        return;
-    }
     toast({
         title: "Exporting...",
         description: "Your results are being prepared for download.",
     });
 
-    let exportContent = `Test Report: ${testData.id}\n`;
-    exportContent += `Test Type: ${testData.type}\n`;
-    exportContent += `Date: ${format(parseISO(testData.date), "MMMM d, yyyy")}\n`;
-    exportContent += `Score: ${testData.score} / ${testData.maxScore}\n\n`;
-    
-    const finalSummary = summary || testData.summary;
-    exportContent += `AI Summary:\n${finalSummary}\n\n`;
+    let exportContent = `MindMetrics Test Report\n=========================\n\n`;
 
-    const finalReport = professionalReport || testData.professionalAnalysis;
-    if (finalReport) {
-      exportContent += `--- Professional Analysis ---\n`;
-      exportContent += `Overview: ${finalReport.overview}\n\n`;
-      exportContent += `Symptom Analysis: ${finalReport.symptomAnalysis}\n\n`;
-      exportContent += `Potential Indicators: ${finalReport.potentialIndicators}\n\n`;
-      exportContent += `Recommendations: ${finalReport.recommendations}\n`;
+    const formatAnalysis = (analysis: AnalysisData | null) => {
+        if (!analysis) return '';
+        const { testData, summary, professionalReport } = analysis;
+        let content = `Test Type: ${testData.type}\n`;
+        content += `Date: ${format(parseISO(testData.date), "MMMM d, yyyy")}\n`;
+        content += `Score: ${testData.score} / ${testData.maxScore}\n\n`;
+        content += `AI Summary:\n${summary}\n\n`;
+        if (professionalReport) {
+            content += `--- Professional Analysis ---\n`;
+            content += `Overview: ${professionalReport.overview}\n\n`;
+            content += `Symptom Analysis: ${professionalReport.symptomAnalysis}\n\n`;
+            content += `Potential Indicators: ${professionalReport.potentialIndicators}\n\n`;
+            content += `Recommendations: ${professionalReport.recommendations}\n`;
+        }
+        return content;
     }
-
+    
+    if (depressionAnalysis) {
+        exportContent += formatAnalysis(depressionAnalysis);
+        exportContent += `\n-------------------------\n\n`;
+    }
+    if (anxietyAnalysis) {
+        exportContent += formatAnalysis(anxietyAnalysis);
+    }
+    
     const blob = new Blob([exportContent], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `MindMetrics_Test_Report_${testData.id}.txt`;
+    link.download = `MindMetrics_Test_Report_${testId}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -181,46 +174,18 @@ export default function ResultsPage() {
   
   const { name, email } = newTestInfo;
   const accountCreationUrl = `/finish-signup?name=${encodeURIComponent(name || '')}&email=${encodeURIComponent(email || '')}`;
-  const score = testData?.score ?? null;
-  const maxScore = testData?.maxScore ?? null;
-  const testType = testData?.type ?? '';
+  
+  const renderAnalysisCard = (analysis: AnalysisData | null, testType: 'Depression' | 'Anxiety') => {
+    if (!analysis && !isLoading) return null;
+    
+    const { testData, summary, professionalReport } = analysis || {};
+    const score = testData?.score ?? null;
+    const maxScore = testData?.maxScore ?? null;
 
-  return (
-    <div className="container mx-auto max-w-4xl p-4 py-8">
-      <div className="space-y-6">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold">Your Assessment Results</h1>
-          <p className="text-muted-foreground mt-2">Here is a breakdown of your recent assessment.</p>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Scores</CardTitle>
-            <CardDescription>This section shows your scores for the completed tests.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {score !== null && maxScore !== null ? (
-              <div className="space-y-2">
-                <div className="flex justify-between font-medium">
-                  <span>{testType} Score</span>
-                  <span>{score} / {maxScore}</span>
-                </div>
-                <Progress value={(score / maxScore) * 100} />
-              </div>
-            ) : isLoading ? (
-               <div className="space-y-4">
-                  <Skeleton className="h-6 w-1/4" />
-                  <Skeleton className="h-4 w-full" />
-              </div>
-            ) : (
-               <p className="text-muted-foreground">No score data available for this result.</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {isLoading ? (
-          <Card>
-            <CardHeader><CardTitle>Generating Analysis...</CardTitle></CardHeader>
+    if (isLoading) {
+      return (
+         <Card>
+            <CardHeader><CardTitle>Generating {testType} Analysis...</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <Skeleton className="h-4 w-1/4" />
               <Skeleton className="h-4 w-full" />
@@ -228,8 +193,25 @@ export default function ResultsPage() {
               <Skeleton className="h-8 w-full mt-4" />
             </CardContent>
           </Card>
-        ) : (
-          <div className="space-y-4">
+      );
+    }
+
+    if (!analysis) return null;
+
+    return (
+      <Card>
+        <CardHeader>
+            <CardTitle>{testType} Results</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+            <div className="space-y-2">
+                <div className="flex justify-between font-medium">
+                  <span>{testType} Score</span>
+                  <span>{score} / {maxScore}</span>
+                </div>
+                {score !== null && maxScore !== null && <Progress value={(score / maxScore) * 100} />}
+            </div>
+            
             {summary && (
               <Alert>
                 <Bot className="h-4 w-4" />
@@ -239,40 +221,47 @@ export default function ResultsPage() {
             )}
 
             {professionalReport && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><Stethoscope/> Professional Analysis</CardTitle>
-                  <CardDescription>A detailed clinical breakdown of the results for healthcare providers.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Accordion type="single" collapsible className="w-full" defaultValue="item-0">
-                    <AccordionItem value="item-0">
-                      <AccordionTrigger>{testType}</AccordionTrigger>
-                      <AccordionContent className="space-y-4 p-1">
-                        <div>
-                          <h4 className="font-semibold">Overview</h4>
-                          <p className="text-muted-foreground text-sm">{professionalReport.overview}</p>
-                        </div>
-                         <div>
-                          <h4 className="font-semibold">Symptom Analysis</h4>
-                          <p className="text-muted-foreground text-sm">{professionalReport.symptomAnalysis}</p>
-                        </div>
-                         <div>
-                          <h4 className="font-semibold">Potential Indicators</h4>
-                          <p className="text-muted-foreground text-sm">{professionalReport.potentialIndicators}</p>
-                        </div>
-                         <div>
-                          <h4 className="font-semibold">Recommendations</h4>
-                          <p className="text-muted-foreground text-sm">{professionalReport.recommendations}</p>
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                </CardContent>
-              </Card>
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="item-1">
+                  <AccordionTrigger className="text-base">
+                    <div className="flex items-center gap-2"><Stethoscope/> Professional Analysis</div>
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-4 p-1">
+                    <div>
+                      <h4 className="font-semibold">Overview</h4>
+                      <p className="text-muted-foreground text-sm">{professionalReport.overview}</p>
+                    </div>
+                      <div>
+                      <h4 className="font-semibold">Symptom Analysis</h4>
+                      <p className="text-muted-foreground text-sm">{professionalReport.symptomAnalysis}</p>
+                    </div>
+                      <div>
+                      <h4 className="font-semibold">Potential Indicators</h4>
+                      <p className="text-muted-foreground text-sm">{professionalReport.potentialIndicators}</p>
+                    </div>
+                      <div>
+                      <h4 className="font-semibold">Recommendations</h4>
+                      <p className="text-muted-foreground text-sm">{professionalReport.recommendations}</p>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             )}
-          </div>
-        )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="container mx-auto max-w-4xl p-4 py-8">
+      <div className="space-y-6">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold">Your Assessment Results</h1>
+          <p className="text-muted-foreground mt-2">Here is a breakdown of your recent assessment.</p>
+        </div>
+
+        {renderAnalysisCard(depressionAnalysis, 'Depression')}
+        {renderAnalysisCard(anxietyAnalysis, 'Anxiety')}
 
         {!isFromHistory && name && email && (
           <Card>
@@ -298,7 +287,7 @@ export default function ResultsPage() {
             <CardTitle>Actions</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col sm:flex-row gap-2">
-            <Button className="w-full sm:w-auto" onClick={handleExport}>
+            <Button className="w-full sm:w-auto" onClick={handleExport} disabled={isLoading || (!depressionAnalysis && !anxietyAnalysis)}>
               <FileDown className="mr-2 h-4 w-4" />
               Export Results
             </Button>

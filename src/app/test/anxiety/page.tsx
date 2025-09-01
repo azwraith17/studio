@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -68,10 +69,13 @@ export default function AnxietyTestPage() {
     const queryParams = new URLSearchParams({
       name,
       email,
-      depressionScore: depressionScore || '',
       anxietyScore: totalScore.toString(),
       anxietyAnswers: anxietyAnswersStr,
     });
+
+    if (depressionScore) {
+       queryParams.set('depressionScore', depressionScore);
+    }
 
     if (depressionAnswers) {
       queryParams.set('depressionAnswers', depressionAnswers);
