@@ -18,6 +18,7 @@ export default function DepressionTestPage() {
   const { toast } = useToast();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [currentAnswer, setCurrentAnswer] = useState<number | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const totalQuestions = depressionQuestions.length;
   const currentQuestion: Question = depressionQuestions[currentQuestionIndex];
@@ -25,12 +26,12 @@ export default function DepressionTestPage() {
   const name = searchParams.get('name') || '';
   const email = searchParams.get('email') || '';
 
-  const handleAnswerChange = (questionId: string, score: number) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: score }));
+  const handleAnswerChange = (score: number) => {
+    setCurrentAnswer(score);
   };
 
   const handleNext = () => {
-    if (answers[currentQuestion.id] === undefined) {
+    if (currentAnswer === undefined) {
       toast({
         title: "Please select an answer",
         description: "You must select an option before proceeding.",
@@ -38,13 +39,15 @@ export default function DepressionTestPage() {
       });
       return;
     }
+    setAnswers((prev) => ({ ...prev, [currentQuestion.id]: currentAnswer }));
+    setCurrentAnswer(undefined);
     if (currentQuestionIndex < totalQuestions - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     }
   };
 
   const handleSubmit = async () => {
-    if (answers[currentQuestion.id] === undefined) {
+    if (currentAnswer === undefined) {
         toast({
           title: "Please select an answer",
           description: "You must select an option before proceeding.",
@@ -52,9 +55,10 @@ export default function DepressionTestPage() {
         });
         return;
     }
-      
+    
+    const finalAnswers = { ...answers, [currentQuestion.id]: currentAnswer };
     setIsSubmitting(true);
-    const totalScore = Object.values(answers).reduce((sum, score) => sum + score, 0);
+    const totalScore = Object.values(finalAnswers).reduce((sum, score) => sum + score, 0);
 
     try {
       const result = await anxietyTestTrigger({ depressionTestScore: totalScore });
@@ -106,8 +110,8 @@ export default function DepressionTestPage() {
           <div className="space-y-4">
             <Label className="text-lg font-semibold">{currentQuestion.text}</Label>
             <RadioGroup
-              value={answers[currentQuestion.id]?.toString()}
-              onValueChange={(value) => handleAnswerChange(currentQuestion.id, parseInt(value))}
+              value={currentAnswer?.toString()}
+              onValueChange={(value) => handleAnswerChange(parseInt(value))}
               className="space-y-2"
             >
               {currentQuestion.options.map((option, index) => (

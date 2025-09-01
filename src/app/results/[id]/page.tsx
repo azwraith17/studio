@@ -27,7 +27,7 @@ export default function ResultsPage() {
   const email = useMemo(() => searchParams.get('email'), [searchParams]);
   
   // These are simplified max scores for the demo tests
-  const maxDepressionScore = 21; 
+  const maxDepressionScore = 63; 
   const maxAnxietyScore = 21;
 
   useEffect(() => {

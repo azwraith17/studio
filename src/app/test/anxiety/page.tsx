@@ -17,6 +17,7 @@ export default function AnxietyTestPage() {
   const { toast } = useToast();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [currentAnswer, setCurrentAnswer] = useState<number | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const totalQuestions = anxietyQuestions.length;
   const currentQuestion: Question = anxietyQuestions[currentQuestionIndex];
@@ -24,12 +25,12 @@ export default function AnxietyTestPage() {
   const name = searchParams.get('name') || '';
   const email = searchParams.get('email') || '';
 
-  const handleAnswerChange = (questionId: string, score: number) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: score }));
+  const handleAnswerChange = (score: number) => {
+    setCurrentAnswer(score);
   };
 
   const handleNext = () => {
-    if (answers[currentQuestion.id] === undefined) {
+    if (currentAnswer === undefined) {
       toast({
         title: "Please select an answer",
         description: "You must select an option before proceeding.",
@@ -37,13 +38,15 @@ export default function AnxietyTestPage() {
       });
       return;
     }
+    setAnswers((prev) => ({ ...prev, [currentQuestion.id]: currentAnswer }));
+    setCurrentAnswer(undefined);
     if (currentQuestionIndex < totalQuestions - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     }
   };
 
   const handleSubmit = async () => {
-     if (answers[currentQuestion.id] === undefined) {
+     if (currentAnswer === undefined) {
         toast({
           title: "Please select an answer",
           description: "You must select an option before proceeding.",
@@ -53,7 +56,8 @@ export default function AnxietyTestPage() {
     }
 
     setIsSubmitting(true);
-    const totalScore = Object.values(answers).reduce((sum, score) => sum + score, 0);
+    const finalAnswers = { ...answers, [currentQuestion.id]: currentAnswer };
+    const totalScore = Object.values(finalAnswers).reduce((sum, score) => sum + score, 0);
     const fromTestId = searchParams.get('fromTest') || `test-${Date.now()}`;
     const depressionScore = searchParams.get('score');
 
@@ -89,8 +93,8 @@ export default function AnxietyTestPage() {
           <div className="space-y-4">
             <Label className="text-lg font-semibold">Over the last 2 weeks, how often have you been bothered by the following problem? <br/> "{currentQuestion.text}"</Label>
             <RadioGroup
-              value={answers[currentQuestion.id]?.toString()}
-              onValueChange={(value) => handleAnswerChange(currentQuestion.id, parseInt(value))}
+              value={currentAnswer?.toString()}
+              onValueChange={(value) => handleAnswerChange(parseInt(value))}
               className="space-y-2"
             >
               {currentQuestion.options.map((option, index) => (
