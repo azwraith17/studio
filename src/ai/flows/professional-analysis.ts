@@ -10,7 +10,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const ProfessionalAnalysisInputSchema = z.object({
+const ProfessionalAnalysisInputSchema = z.object({
   testName: z.string().describe('The name of the test (e.g., "Depression (BDI-based)", "Anxiety (GAD-7-based)").'),
   answers: z.record(z.string(), z.number()).describe('An object mapping question IDs to the numerical score for each answer.'),
   questions: z.record(z.string(), z.string()).describe('An object mapping question IDs to the question text.'),
@@ -19,7 +19,7 @@ export const ProfessionalAnalysisInputSchema = z.object({
 });
 export type ProfessionalAnalysisInput = z.infer<typeof ProfessionalAnalysisInputSchema>;
 
-export const ProfessionalAnalysisOutputSchema = z.object({
+const ProfessionalAnalysisOutputSchema = z.object({
   overview: z.string().describe('A clinical overview of the results, including score interpretation and severity level.'),
   symptomAnalysis: z.string().describe('A detailed analysis of symptom clusters and specific responses that are clinically significant.'),
   potentialIndicators: z.string().describe('Highlights any critical items or potential red flags (e.g., responses related to self-harm).'),
