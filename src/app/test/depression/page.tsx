@@ -26,8 +26,8 @@ export default function DepressionTestPage() {
   const name = searchParams.get('name') || '';
   const email = searchParams.get('email') || '';
 
-  const handleAnswerChange = (score: number) => {
-    setCurrentAnswer(score);
+  const handleAnswerChange = (value: string) => {
+    setCurrentAnswer(parseInt(value));
   };
 
   const handleNext = () => {
@@ -40,10 +40,11 @@ export default function DepressionTestPage() {
       return;
     }
     setAnswers((prev) => ({ ...prev, [currentQuestion.id]: currentAnswer }));
-    setCurrentAnswer(null);
+    
     if (currentQuestionIndex < totalQuestions - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     }
+    setCurrentAnswer(null); // Reset for the next question
   };
 
   const handleSubmit = async () => {
@@ -110,8 +111,9 @@ export default function DepressionTestPage() {
           <div className="space-y-4">
             <Label className="text-lg font-semibold">{currentQuestion.text}</Label>
             <RadioGroup
+              key={currentQuestionIndex}
               value={currentAnswer?.toString()}
-              onValueChange={(value) => handleAnswerChange(parseInt(value))}
+              onValueChange={handleAnswerChange}
               className="space-y-2"
             >
               {currentQuestion.options.map((option, index) => (
