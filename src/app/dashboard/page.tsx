@@ -49,12 +49,30 @@ export default function ClientDashboard() {
         </CardHeader>
         <CardContent>
           <div className="h-[300px] w-full">
-             <ChartContainer config={chartConfig} className="w-full h-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
-                  <YAxis stroke="hsl(var(--muted-foreground))" />
+            <ResponsiveContainer width="100%" height="100%">
+              <ChartContainer config={chartConfig}>
+                <LineChart
+                  accessibilityLayer
+                  data={chartData}
+                  margin={{
+                    top: 5,
+                    right: 20,
+                    left: -10,
+                    bottom: 5,
+                  }}
+                >
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                  />
+                   <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                  />
                   <ChartTooltip
                     cursor={false}
                     content={<ChartTooltipContent indicator="dot" />}
@@ -64,17 +82,11 @@ export default function ClientDashboard() {
                     type="monotone"
                     stroke="var(--color-score)"
                     strokeWidth={2}
-                    dot={{
-                      fill: "var(--color-score)",
-                      r: 4,
-                    }}
-                    activeDot={{
-                      r: 6,
-                    }}
+                    dot={false}
                   />
                 </LineChart>
-              </ResponsiveContainer>
-            </ChartContainer>
+              </ChartContainer>
+            </ResponsiveContainer>
           </div>
         </CardContent>
       </Card>
