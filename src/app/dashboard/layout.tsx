@@ -2,7 +2,7 @@
 import { Logo } from "@/components/logo";
 import { UserNav } from "@/components/user-nav";
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset } from "@/components/ui/sidebar";
-import { LayoutDashboard, History, LogOut, User } from "lucide-react";
+import { LayoutDashboard, History, LogOut, User, ClipboardList } from "lucide-react";
 import Link from "next/link";
 
 export default function DashboardLayout({
@@ -11,10 +11,10 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider>
+     <SidebarProvider>
       <Sidebar>
         <div className="flex h-full flex-col">
-          <div className="flex h-16 items-center px-4 border-b">
+           <div className="flex h-16 items-center px-4 border-b">
             <Logo />
           </div>
           <div className="flex-1 overflow-y-auto">
@@ -22,6 +22,11 @@ export default function DashboardLayout({
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Dashboard">
                   <Link href="/dashboard"><LayoutDashboard /><span>Dashboard</span></Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+               <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Tests">
+                  <Link href="/dashboard/tests"><ClipboardList /><span>Tests</span></Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
@@ -48,7 +53,7 @@ export default function DashboardLayout({
         </div>
       </Sidebar>
       <SidebarInset>
-        <div className="flex flex-col w-full min-h-screen">
+         <div className="flex flex-col w-full min-h-screen">
             <header className="flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
               <SidebarTrigger />
               <div className="flex-1">

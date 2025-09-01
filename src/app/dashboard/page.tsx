@@ -39,7 +39,7 @@ export default function ClientDashboard() {
           <p className="text-muted-foreground">Here&apos;s a summary of your recent activity and progress.</p>
         </div>
         <Button asChild size="lg">
-          <Link href="/test/depression">
+          <Link href="/dashboard/tests">
             <PlusCircle className="mr-2 h-5 w-5" />
             Start New Test
           </Link>
