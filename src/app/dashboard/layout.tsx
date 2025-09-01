@@ -36,7 +36,7 @@ export default function DashboardLayout({
               </SidebarMenuItem>
             </SidebarMenu>
           </div>
-          <div className="mt-auto p-4">
+          <div className="mt-auto p-4 border-t">
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
@@ -47,20 +47,20 @@ export default function DashboardLayout({
           </div>
         </div>
       </Sidebar>
-      <SidebarInset>
-        <div className="flex flex-col min-h-screen">
-          <header className="flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6 sticky top-0 z-30">
+      <div className="flex flex-col w-full min-h-screen">
+          <header className="flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6 sticky top-0 z-30">
             <SidebarTrigger className="sm:hidden" />
             <div className="flex-1">
               {/* Can add breadcrumbs or page title here */}
             </div>
             <UserNav />
           </header>
-          <main className="flex-1 p-4 sm:p-6">
-            {children}
+          <main className="flex-1 p-4 sm:p-6 bg-muted/40">
+            <SidebarInset>
+                {children}
+            </SidebarInset>
           </main>
-        </div>
-      </SidebarInset>
+      </div>
     </SidebarProvider>
   );
 }
