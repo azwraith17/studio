@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ProfilePage() {
@@ -28,16 +29,26 @@ export default function ProfilePage() {
         <Card>
             <CardHeader>
                 <CardTitle>Personal Information</CardTitle>
-                <CardDescription>Update your name and email address.</CardDescription>
+                <CardDescription>Update your personal and medical details.</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
-                <div className="grid gap-2">
-                    <Label htmlFor="name">Full Name</Label>
-                    <Input id="name" defaultValue="Client Name" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                      <Label htmlFor="name">Full Name</Label>
+                      <Input id="name" defaultValue="Client Name" />
+                  </div>
+                  <div className="grid gap-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input id="email" type="email" defaultValue="client@example.com" />
+                  </div>
+                </div>
+                 <div className="grid gap-2">
+                    <Label htmlFor="age">Age</Label>
+                    <Input id="age" type="number" placeholder="Enter your age" />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" defaultValue="client@example.com" />
+                    <Label htmlFor="medical-info">Medical Conditions or Current Medications</Label>
+                    <Textarea id="medical-info" placeholder="e.g., Asthma, Allergy medication" rows={4} />
                 </div>
             </CardContent>
             <CardFooter className="border-t px-6 py-4">
