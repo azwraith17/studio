@@ -1,4 +1,6 @@
 
+"use client";
+
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { mockPsychologistClients } from "@/lib/data";
@@ -37,7 +39,7 @@ export default function PsychologistDashboard() {
                   <TableCell>{format(parseISO(client.lastTestDate), "MMMM d, yyyy")}</TableCell>
                   <TableCell className="text-right">
                     <Button asChild variant="ghost" size="sm">
-                       <Link href="#">
+                       <Link href={`/psychologist/clients/${client.id}`}>
                         View Details <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>

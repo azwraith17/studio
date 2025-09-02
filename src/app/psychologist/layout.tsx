@@ -37,7 +37,7 @@ export default function PsychologistLayout({
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Clients">
-                  <Link href="#">
+                  <Link href="/psychologist/dashboard">
                     <Users />
                     <span>Clients</span>
                   </Link>
