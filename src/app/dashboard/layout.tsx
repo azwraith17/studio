@@ -2,7 +2,7 @@
 import { Logo } from "@/components/logo";
 import { UserNav } from "@/components/user-nav";
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset } from "@/components/ui/sidebar";
-import { LayoutDashboard, History, LogOut, User, ClipboardList, Shield } from "lucide-react";
+import { LayoutDashboard, History, LogOut, User, ClipboardList } from "lucide-react";
 import Link from "next/link";
 
 export default function DashboardLayout({
@@ -37,11 +37,6 @@ export default function DashboardLayout({
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Profile">
                   <Link href="/dashboard/profile"><User /><span>Profile</span></Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-                 <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Admin">
-                  <Link href="/dashboard/admin"><Shield /><span>Admin</span></Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
