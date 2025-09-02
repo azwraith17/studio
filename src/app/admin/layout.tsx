@@ -22,7 +22,7 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user } = useAuth();
+  const { logout } = useAuth();
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
       <SidebarProvider>
@@ -54,11 +54,9 @@ export default function AdminLayout({
             <div className="mt-auto border-t p-4">
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Logout">
-                    <Link href="/admin/login">
-                      <LogOut />
-                      <span>Logout</span>
-                    </Link>
+                  <SidebarMenuButton onClick={logout} tooltip="Logout">
+                    <LogOut />
+                    <span>Logout</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
