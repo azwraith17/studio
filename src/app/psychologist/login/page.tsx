@@ -16,18 +16,30 @@ import { Logo } from "@/components/logo";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { useAuth } from "@/contexts/auth-context";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 export default function PsychologistLoginPage() {
   const router = useRouter();
   const { login } = useAuth();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     const form = e.currentTarget as HTMLFormElement;
     const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
 
-    login({ name: 'Dr. Evelyn Reed', email, role: 'psychologist' });
-    router.push('/psychologist/dashboard');
+    const success = await login(email, password);
+
+    if (success) {
+      router.push('/psychologist/dashboard');
+    } else {
+      toast({ title: "Login Failed", description: "Invalid email or password.", variant: "destructive" });
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -52,7 +64,9 @@ export default function PsychologistLoginPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button className="w-full" type="submit">Log In</Button>
+            <Button className="w-full" type="submit" disabled={isLoading}>
+                {isLoading ? "Logging in..." : "Log In"}
+            </Button>
              <p className="text-xs text-center text-muted-foreground">
               Not a psychologist? Go to{' '}
               <Link href="/login" className="font-semibold text-primary underline-offset-4 hover:underline">

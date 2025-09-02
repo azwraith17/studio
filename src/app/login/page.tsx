@@ -16,19 +16,31 @@ import { Logo } from "@/components/logo";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { useAuth } from "@/contexts/auth-context";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     const form = e.currentTarget as HTMLFormElement;
     const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
     
-    // In a real app, you would validate credentials against a database
-    login({ name: 'Client User', email, role: 'client' });
-    router.push('/dashboard');
+    const success = await login(email, password);
+
+    if (success) {
+       toast({ title: "Login Successful", description: "Welcome back!" });
+       router.push('/dashboard');
+    } else {
+       toast({ title: "Login Failed", description: "Invalid email or password.", variant: "destructive" });
+       setIsLoading(false);
+    }
   };
 
   return (
@@ -53,7 +65,9 @@ export default function LoginPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button className="w-full" type="submit">Log In</Button>
+            <Button className="w-full" type="submit" disabled={isLoading}>
+                {isLoading ? "Logging in..." : "Log In"}
+            </Button>
             <p className="text-sm text-center text-muted-foreground">
               Don&apos;t have an account?{' '}
               <Link href="/signup" className="font-semibold text-primary underline-offset-4 hover:underline">

@@ -15,15 +15,33 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/logo";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
+import { useAuth } from "@/contexts/auth-context";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 export default function SignupPage() {
   const router = useRouter();
+  const { signup } = useAuth();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you'd handle account creation here.
-    // For now, we redirect all signups to the client dashboard.
-    router.push('/dashboard');
+    setIsLoading(true);
+    const form = e.currentTarget as HTMLFormElement;
+    const name = (form.elements.namedItem("name") as HTMLInputElement).value;
+    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+
+    const success = await signup(name, email, password);
+
+    if (success) {
+      toast({ title: "Account Created", description: "You have been successfully signed up." });
+      router.push('/dashboard');
+    } else {
+      toast({ title: "Signup Failed", description: "An account with this email already exists.", variant: "destructive" });
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -52,7 +70,9 @@ export default function SignupPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button className="w-full" type="submit">Create Account</Button>
+            <Button className="w-full" type="submit" disabled={isLoading}>
+                {isLoading ? "Creating Account..." : "Create Account"}
+            </Button>
             <p className="text-sm text-center text-muted-foreground">
               Already have an account?{' '}
               <Link href="/login" className="font-semibold text-primary underline-offset-4 hover:underline">

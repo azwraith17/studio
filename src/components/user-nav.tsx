@@ -15,11 +15,9 @@ import {
 import { LogOut, User } from "lucide-react";
 import Link from 'next/link';
 import { useAuth } from "@/contexts/auth-context";
-import { useRouter } from "next/navigation";
 
 export function UserNav() {
   const { user, logout } = useAuth();
-  const router = useRouter();
 
   if (!user) {
     return null;
@@ -27,20 +25,13 @@ export function UserNav() {
 
   const handleLogout = () => {
     logout();
-    if (user.role === 'admin') {
-      router.push('/admin/login');
-    } else if (user.role === 'psychologist') {
-      router.push('/psychologist/login');
-    } else {
-      router.push('/login');
-    }
   };
 
   const getProfileLink = () => {
     switch(user.role) {
       case 'client': return '/dashboard/profile';
-      case 'admin': return '/admin/dashboard'; // Or a dedicated admin profile page
-      case 'psychologist': return '/psychologist/dashboard'; // Or a dedicated psych profile page
+      case 'admin': return '/admin/dashboard';
+      case 'psychologist': return '/psychologist/dashboard';
       default: return '/';
     }
   }
