@@ -1,3 +1,4 @@
+
 import type { ProfessionalAnalysisOutput } from "@/ai/flows/professional-analysis";
 
 export type TestResult = {
@@ -58,6 +59,22 @@ export const mockTestHistory: TestResult[] = [
     }
   },
 ];
+
+export type Psychologist = {
+  id: string;
+  name: string;
+  email: string;
+  status: 'Active' | 'Inactive';
+  clients: number;
+};
+
+
+export const mockPsychologists: Psychologist[] = [
+  { id: 'psych-1', name: 'Dr. Evelyn Reed', email: 'e.reed@example.com', status: 'Active', clients: 15 },
+  { id: 'psych-2', name: 'Dr. Samuel Green', email: 's.green@example.com', status: 'Active', clients: 12 },
+  { id: 'psych-3', name: 'Dr. Olivia Blue', email: 'o.blue@example.com', status: 'Inactive', clients: 0 },
+];
+
 
 export type PsychologistClient = {
     id: string;

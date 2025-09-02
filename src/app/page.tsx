@@ -1,3 +1,4 @@
+
 "use client";
 import React from 'react';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,13 @@ export default function Home() {
         <Logo />
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Button variant="ghost" asChild>
-            <Link href="/login">Log In</Link>
+            <Link href="/login">Client Log In</Link>
+          </Button>
+           <Button variant="ghost" asChild>
+            <Link href="/psychologist/login">Psychologist Log In</Link>
+          </Button>
+           <Button variant="ghost" asChild>
+            <Link href="/admin/login">Admin Log In</Link>
           </Button>
           <Button asChild>
             <Link href="/signup">Sign Up</Link>

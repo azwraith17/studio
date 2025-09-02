@@ -15,12 +15,20 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/logo";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
+import { useAuth } from "@/contexts/auth-context";
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    const form = e.currentTarget as HTMLFormElement;
+    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    
+    // In a real app, you would validate credentials.
+    // Here we're just logging in the user.
+    login({ name: 'Admin User', email, role: 'admin' });
     router.push('/admin/dashboard');
   };
 
@@ -38,11 +46,11 @@ export default function AdminLoginPage() {
           <CardContent className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="admin@example.com" required />
+              <Input id="email" type="email" placeholder="admin@example.com" required defaultValue="admin@example.com" />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" required />
+              <Input id="password" type="password" required defaultValue="password" />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">

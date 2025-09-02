@@ -20,16 +20,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-
-// Mock data for psychologists
-const mockPsychologists = [
-  { id: 'psych-1', name: 'Dr. Evelyn Reed', email: 'e.reed@example.com', status: 'Active', clients: 15 },
-  { id: 'psych-2', name: 'Dr. Samuel Green', email: 's.green@example.com', status: 'Active', clients: 12 },
-  { id: 'psych-3', name: 'Dr. Olivia Blue', email: 'o.blue@example.com', status: 'Inactive', clients: 0 },
-];
+import { mockPsychologists, Psychologist } from '@/lib/data';
 
 export default function AdminDashboard() {
-  const [psychologists, setPsychologists] = useState(mockPsychologists);
+  const [psychologists, setPsychologists] = useState<Psychologist[]>(mockPsychologists);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
@@ -39,7 +33,7 @@ export default function AdminDashboard() {
       const nameInput = form.elements.namedItem('name') as HTMLInputElement;
       const emailInput = form.elements.namedItem('email') as HTMLInputElement;
       
-      const newPsychologist = {
+      const newPsychologist: Psychologist = {
           id: `psych-${Date.now()}`,
           name: nameInput.value,
           email: emailInput.value,
@@ -50,6 +44,7 @@ export default function AdminDashboard() {
       setPsychologists(prev => [...prev, newPsychologist]);
 
       setIsDialogOpen(false);
+      form.reset();
       toast({
           title: "Account Created",
           description: "The new psychologist account has been successfully created.",
