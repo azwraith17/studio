@@ -29,17 +29,31 @@ const mockPsychologists = [
 ];
 
 export default function AdminDashboard() {
+  const [psychologists, setPsychologists] = useState(mockPsychologists);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleCreatePsychologist = (e: React.FormEvent) => {
+  const handleCreatePsychologist = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      // In a real app, you'd handle form submission to your backend here.
+      const form = e.currentTarget;
+      const nameInput = form.elements.namedItem('name') as HTMLInputElement;
+      const emailInput = form.elements.namedItem('email') as HTMLInputElement;
+      
+      const newPsychologist = {
+          id: `psych-${Date.now()}`,
+          name: nameInput.value,
+          email: emailInput.value,
+          status: 'Active',
+          clients: 0,
+      };
+
+      setPsychologists(prev => [...prev, newPsychologist]);
+
       setIsDialogOpen(false);
       toast({
           title: "Account Created",
           description: "The new psychologist account has been successfully created.",
-      })
+      });
   }
 
   return (
@@ -69,19 +83,19 @@ export default function AdminDashboard() {
                     <Label htmlFor="name" className="text-right">
                     Name
                     </Label>
-                    <Input id="name" placeholder="Dr. John Doe" className="col-span-3" required/>
+                    <Input id="name" name="name" placeholder="Dr. John Doe" className="col-span-3" required/>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="email" className="text-right">
                     Email
                     </Label>
-                    <Input id="email" type="email" placeholder="john.doe@example.com" className="col-span-3" required/>
+                    <Input id="email" name="email" type="email" placeholder="john.doe@example.com" className="col-span-3" required/>
                 </div>
                  <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="password" className="text-right">
                     Temporary Password
                     </Label>
-                    <Input id="password" type="password" className="col-span-3" required/>
+                    <Input id="password" name="password" type="password" className="col-span-3" required/>
                 </div>
                 </div>
                  <DialogFooter>
@@ -108,7 +122,7 @@ export default function AdminDashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockPsychologists.map((psych) => (
+              {psychologists.map((psych) => (
                 <TableRow key={psych.id}>
                   <TableCell className="font-medium">{psych.name}</TableCell>
                   <TableCell>{psych.email}</TableCell>
