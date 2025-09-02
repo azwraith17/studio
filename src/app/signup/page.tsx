@@ -12,25 +12,18 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Logo } from "@/components/logo";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 
 export default function SignupPage() {
   const router = useRouter();
-  const [role, setRole] = useState('client');
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
     // In a real app, you'd handle account creation here.
-    // We'll redirect based on the selected role.
-    if (role === 'client') {
-      router.push('/dashboard');
-    } else {
-      router.push('/dashboard/psychologist');
-    }
+    // For now, we redirect all signups to the client dashboard.
+    router.push('/dashboard');
   };
 
   return (
@@ -56,19 +49,6 @@ export default function SignupPage() {
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
               <Input id="password" type="password" required />
-            </div>
-            <div className="grid gap-2">
-              <Label>I am a...</Label>
-              <RadioGroup defaultValue="client" onValueChange={setRole} className="flex gap-4">
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="client" id="client" />
-                  <Label htmlFor="client">Client</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="psychologist" id="psychologist" />
-                  <Label htmlFor="psychologist">Psychologist</Label>
-                </div>
-              </RadioGroup>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
