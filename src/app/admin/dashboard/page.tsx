@@ -1,11 +1,25 @@
 
+"use client";
 
+import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock data for psychologists
 const mockPsychologists = [
@@ -15,6 +29,19 @@ const mockPsychologists = [
 ];
 
 export default function AdminDashboard() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { toast } = useToast();
+
+  const handleCreatePsychologist = (e: React.FormEvent) => {
+      e.preventDefault();
+      // In a real app, you'd handle form submission to your backend here.
+      setIsDialogOpen(false);
+      toast({
+          title: "Account Created",
+          description: "The new psychologist account has been successfully created.",
+      })
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -22,10 +49,47 @@ export default function AdminDashboard() {
           <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
           <p className="text-muted-foreground">Manage psychologists and oversee the platform.</p>
         </div>
-        <Button size="lg">
-            <PlusCircle className="mr-2 h-5 w-5" />
-            Add New Psychologist
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button size="lg">
+              <PlusCircle className="mr-2 h-5 w-5" />
+              Add New Psychologist
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Add New Psychologist</DialogTitle>
+              <DialogDescription>
+                Create a new psychologist account. They will receive an email to set up their password.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleCreatePsychologist}>
+                <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="name" className="text-right">
+                    Name
+                    </Label>
+                    <Input id="name" placeholder="Dr. John Doe" className="col-span-3" required/>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="email" className="text-right">
+                    Email
+                    </Label>
+                    <Input id="email" type="email" placeholder="john.doe@example.com" className="col-span-3" required/>
+                </div>
+                 <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="password" className="text-right">
+                    Temporary Password
+                    </Label>
+                    <Input id="password" type="password" className="col-span-3" required/>
+                </div>
+                </div>
+                 <DialogFooter>
+                    <Button type="submit">Create Account</Button>
+                </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
       <Card>
         <CardHeader>
